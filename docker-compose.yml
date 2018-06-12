@@ -1,6 +1,7 @@
 version: "3.3"
 networks:
-   mysql-database:
+    mysql-database:
+    postgres-database:
 services:
     db-mysql:
         image: mysql/mysql-server:5.6
@@ -15,13 +16,13 @@ services:
           - mysql-database
     db-postgres:
         image: postgres:9.3
-        container_name: openshr-db-postgres
+        container_name: postgresql-openxds
         env_file:
             - db.env
-        ports:
-            - "5432:5432"
+        volumes:
+            - ./create_database_schema_postgres.sql:/docker-entrypoint-initdb.d/create_database_schema_postgres.sql
         networks:
-          - postgres-database
+            - postgres-database
     webapp:
         image: tomcat:7-jre7-alpine
         container_name: openshr-tomcat
@@ -32,6 +33,20 @@ services:
             - ./openmrs-runtime.properties:/root/.OpenMRS/openmrs-runtime.properties
             - ./modules:/root/.OpenMRS/modules
         ports:
-            - "8081:8080"
+            - "8082:8080"
         networks:
             - mysql-database
+    openxds:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: openshr-openxds
+        env_file:
+            - db.env
+        ports:
+            - "8010:8010"
+            - "8020:8020"
+        depends_on:
+            - db-postgres
+        networks:
+            - postgres-database
