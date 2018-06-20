@@ -13,18 +13,20 @@ RUN curl -L "https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_
 RUN apt-get update && apt-get install -y postgresql-client
 
 # Install OpenXDS
-ENV HOME_SHARE="/opt"
+ENV HOME_SHARE="/usr/share/openxds"
+ENV OPENXDS_HOME ${HOME_SHARE}
 
-RUN mkdir -p "${HOME_SHARE}/openxds/" \
-    && curl -L "https://github.com/jembi/openxds/releases/download/v1.1.2/openxds.tar.gz" \
-            -o ${HOME_SHARE}/openxds.tar.gz \
-    && tar -zxvf ${HOME_SHARE}/openxds.tar.gz -C ${HOME_SHARE}/openxds \
-    && rm ${HOME_SHARE}/openxds.tar.gz
+RUN mkdir -p ${HOME_SHARE}
+WORKDIR ${HOME_SHARE}
 
-ADD openxds.properties ${HOME_SHARE}/openxds/openxds.properties
-RUN cd ${HOME_SHARE}/openxds/
-ADD run.sh ${HOME_SHARE}/openxds/run.sh
-RUN chmod +x ${HOME_SHARE}/openxds/run.sh
+RUN curl -L "https://github.com/jembi/openxds/releases/download/v1.1.2/openxds.tar.gz" -o openxds.tar.gz \
+    && tar -zxvf openxds.tar.gz -C . \
+    && rm openxds.tar.gz
+
+ADD openxds.properties openxds.properties
+ADD XdsCodes.xml conf/actors/XdsCodes.xml
+ADD start_openxds.sh start_openxds.sh
+RUN chmod +x start_openxds.sh
 
 # Run using dockerize
-CMD ["dockerize","-wait","tcp://postgresql-openxds:5432","-timeout","20s","/opt/openxds/run.sh", "run"]
+CMD ["dockerize","-wait","tcp://postgresql-openxds:5432","-timeout","20s","/usr/share/openxds/start_openxds.sh", "run"]
