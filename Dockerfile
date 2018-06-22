@@ -25,6 +25,7 @@ RUN curl -L "https://github.com/jembi/openxds/releases/download/v1.1.2/openxds.t
 
 ADD openxds.properties openxds.properties
 ADD XdsCodes.xml conf/actors/XdsCodes.xml
+ADD XdsRegistryConnections.xml conf/actors/XdsRegistryConnections.xml
 ADD start_openxds.sh start_openxds.sh
 RUN chmod +x start_openxds.sh
 
