@@ -3,31 +3,28 @@ networks:
     mysql-database:
     postgres-database:
 services:
-    db-mysql:
+    openshr-mysql:
         image: mysql/mysql-server:5.6
-        container_name: openshr-db-mysql
-        volumes:
-            - ./openmrs_db.sql:/docker-entrypoint-initdb.d/openmrs_db.sql
+        container_name: openshr-mysql
         env_file:
             - db.env
+        volumes:
+            - ./openmrs_db.sql:/docker-entrypoint-initdb.d/openmrs_db.sql
+            - ./openmrs_db_config.sql:/docker-entrypoint-initdb.d/openmrs_db_config.sql
         ports:
             - "3308:3306"
         networks:
           - mysql-database
-    db-postgres:
-        image: postgres:9.3
+    openshr-postgres:
+        image: postgres:9.6
         container_name: postgresql-openxds
-        env_file:
-            - db.env
-        volumes:
-            - ./create_database_schema_postgres.sql:/docker-entrypoint-initdb.d/create_database_schema_postgres.sql
         networks:
             - postgres-database
-    webapp:
-        image: tomcat:7-jre7-alpine
-        container_name: openshr-tomcat
+    openshr-openmrs:
+        image: tomcat:7.0-jre7-alpine
+        container_name: openshr-openmrs
         depends_on:
-            - db-mysql
+            - openshr-mysql
         volumes:
             - ./openmrs.war:/usr/local/tomcat/webapps/openmrs.war
             - ./openmrs-runtime.properties:/root/.OpenMRS/openmrs-runtime.properties
@@ -36,17 +33,15 @@ services:
             - "8082:8080"
         networks:
             - mysql-database
-    openxds:
-        build:
-            context: .
-            dockerfile: Dockerfile
+    openshr-openxds:
+        image: uwitech/openxds
         container_name: openshr-openxds
-        env_file:
-            - db.env
+        volumes:
+            - ./XdsCodes.xml:/opt/openxds/conf/actors/XdsCodes.xml
         ports:
             - "8010:8010"
             - "8020:8020"
         depends_on:
-            - db-postgres
+            - openshr-postgres
         networks:
             - postgres-database
