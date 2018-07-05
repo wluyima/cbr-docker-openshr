@@ -46,6 +46,10 @@ SET property_value = 'LGS3rs7LAYp'
 WHERE property = 'dhis2tracker.lastnameUID';
 
 UPDATE global_property
+SET property_value = 'BFeNShBIsuB'
+WHERE property = 'dhis2tracker.middlenameUID';
+
+UPDATE global_property
 SET property_value = 'C196Ox4Ayeh'
 WHERE property = 'dhis2tracker.genderUID';
 
